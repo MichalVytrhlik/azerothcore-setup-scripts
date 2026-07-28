@@ -1,6 +1,6 @@
-# AzerothCore setup scripts for Raspberry Pi 4B
+# AzerothCore setup scripts for Ubuntu 24.04 LTS
 
-These scripts automate installing and running **AzerothCore (WotLK)** on **Ubuntu 24.04 LTS** on a Raspberry Pi 4B.
+These scripts automate installing and running **AzerothCore (WotLK)** on **Ubuntu 24.04 LTS**.
 
 ## What these scripts do
 
@@ -40,11 +40,11 @@ Then you can:
 
 ## Install on target machine
 
-On the Raspberry Pi target machine:
+On the target Ubuntu 24.04 LTS machine:
 
 ```bash
 git clone https://github.com/MichalVytrhlik/azerothcore-setup-scripts.git
-cd azerothcore-setup-scripts/rasberry-pi-4b
+cd azerothcore-setup-scripts/ubuntu-24.04-lts
 chmod +x *.sh
 ./setup-azerothcore.sh
 ```
@@ -87,6 +87,6 @@ Important variables:
 
 ## Notes
 
-- `build-azerothcore.sh` can take a long time on Pi 4B (commonly 1-2 hours).
+- `build-azerothcore.sh` can take a long time on slower hardware.
 - `init-db.sh` is interactive when existing `acore_*` databases are detected (unless `AC_INIT_DB_FROM_SCRATCH` is set).
 - `start-servers.sh` requires map data in `$AC_DIST_DIR/data/maps`.

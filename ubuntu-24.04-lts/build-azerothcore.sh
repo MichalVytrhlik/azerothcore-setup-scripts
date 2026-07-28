@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/acore-env.sh"
 
 echo "Starting AzerothCore build..."
-echo "This may take 1-2 hours on Raspberry Pi 4B"
+echo "This may take 1-2 hours on slower hardware"
 echo "Build directory: $AC_CODE_DIR/build"
 echo "Install directory: $AC_DIST_DIR"
 echo "Toolchain: C=$AC_CMAKE_C_COMPILER CXX=$AC_CMAKE_CXX_COMPILER Jobs=$AC_BUILD_CORES"
