@@ -10,29 +10,26 @@ fi
 
 if [ ! -d "$AC_DATA_DIR/maps" ]; then
     echo "✗ Map files not found!"
-    echo "  Run: $AC_INSTALL_HELPERS_DIR/extract-maps.sh"
+    echo "  Run: $SCRIPT_DIR/extract-maps.sh"
     exit 1
 fi
 
 echo "Starting AzerothCore servers..."
 echo ""
 
-# Start in screen sessions for easy management
-echo "[1/2] Starting authserver..."
-screen -dmS authserver bash -lc "cd \"$AC_DIST_DIR\" && ./bin/authserver -c ./etc/authserver.conf"
+echo "[1/2] Running: start-authserver.sh"
+bash "$SCRIPT_DIR/start-authserver.sh"
 
 sleep 2
 
-echo "[2/2] Starting worldserver..."
-screen -dmS worldserver bash -lc "cd \"$AC_DIST_DIR\" && ./bin/worldserver -c ./etc/worldserver.conf"
+echo ""
+echo "[2/2] Running: start-worldserver.sh"
+bash "$SCRIPT_DIR/start-worldserver.sh"
 
 echo ""
-echo "✓ Servers started in screen sessions"
+echo "✓ All servers started"
 echo ""
-echo "Attach to authserver: screen -r authserver"
-echo "Attach to worldserver: screen -r worldserver"
-echo "Detach: Ctrl+A then D"
-echo ""
-echo "Stop servers:"
+echo "To stop servers:"
 echo "  screen -S authserver -X quit"
 echo "  screen -S worldserver -X quit"
+
