@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Detect OS and architecture
+DETECTED_ARCH=$(uname -m)
+DETECTED_OS=$(grep ^ID= /etc/os-release 2>/dev/null | cut -d= -f2 | tr -d '"' || echo "unknown")
+
+export AC_DETECTED_OS="$DETECTED_OS"
+export AC_DETECTED_ARCH="$DETECTED_ARCH"
+
 export AC_CODE_DIR="${AC_CODE_DIR:-$HOME/azerothcore}"
 export AC_DIST_DIR="${AC_DIST_DIR:-$AC_CODE_DIR/env/dist}"
 export AC_BIN_DIR="${AC_BIN_DIR:-$AC_DIST_DIR/bin}"
