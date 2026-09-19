@@ -4,6 +4,10 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/acore-env.sh"
 
+echo "Installing AzerothCore dependencies..."
+echo "Detected OS: $AC_DETECTED_OS | Arch: $AC_DETECTED_ARCH"
+echo ""
+
 echo "[1.1] Updating system..."
 sudo apt update && sudo apt upgrade -y
 echo "      ✓ Updated"
