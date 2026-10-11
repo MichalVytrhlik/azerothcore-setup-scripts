@@ -61,12 +61,22 @@ else
     echo "[4.3] Ensuring database user exists..."
 fi
 
+MYSQL_CREATE_SQL_FILE="$AC_CODE_DIR/data/sql/create/create_mysql.sql"
+if [ ! -f "$MYSQL_CREATE_SQL_FILE" ]; then
+    echo "      ✗ MySQL creation script not found: $MYSQL_CREATE_SQL_FILE"
+    exit 1
+fi
+
+sed -i \
+    -e "s|'acore'@'localhost'|'$AC_MYSQL_USER'@'$AC_MYSQL_HOST'|g" \
+    -e "s|IDENTIFIED BY 'acore'|IDENTIFIED BY '$AC_MYSQL_PASS'|g" \
+    "$MYSQL_CREATE_SQL_FILE"
+
+MYSQL_CREATE_SQL_FILE_CONTENT=$(cat "$MYSQL_CREATE_SQL_FILE")
+
 sudo mysql -u root <<EOF
 $MYSQL_RESET_SQL
-CREATE USER IF NOT EXISTS '$AC_MYSQL_USER'@'$AC_MYSQL_HOST' IDENTIFIED BY '$AC_MYSQL_PASS';
-ALTER USER '$AC_MYSQL_USER'@'$AC_MYSQL_HOST' IDENTIFIED BY '$AC_MYSQL_PASS';
-GRANT ALL PRIVILEGES ON *.* TO '$AC_MYSQL_USER'@'$AC_MYSQL_HOST';
-FLUSH PRIVILEGES;
+$MYSQL_CREATE_SQL_FILE_CONTENT
 EOF
 
 if [ "$INIT_DB_FROM_SCRATCH" = "true" ]; then
