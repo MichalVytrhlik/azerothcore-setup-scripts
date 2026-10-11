@@ -31,7 +31,6 @@ export AC_CMAKE_CXX_COMPILER="${AC_CMAKE_CXX_COMPILER:-/usr/bin/clang++}"
 export AC_TOOLS_BUILD="${AC_TOOLS_BUILD:-all}"
 export AC_SCRIPTS_BUILD="${AC_SCRIPTS_BUILD:-static}"
 export AC_MODULES_BUILD="${AC_MODULES_BUILD:-static}"
-export AC_POSSIBLE_BUILD_CORES="${AC_POSSIBLE_BUILD_CORES:-`nproc | awk '{print $1 - 1}'`}"
 export AC_BUILD_CORES="${AC_BUILD_CORES:-2}"
 
 export AC_INSTALL_HELPERS_DIR="${AC_INSTALL_HELPERS_DIR:-$HOME/scripts}"
