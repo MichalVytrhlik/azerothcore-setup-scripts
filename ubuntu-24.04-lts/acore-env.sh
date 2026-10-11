@@ -15,7 +15,7 @@ export AC_DATA_DIR="${AC_DATA_DIR:-$AC_DIST_DIR/data}"
 export AC_SQL_BASE_DIR="${AC_SQL_BASE_DIR:-$AC_CODE_DIR/data/sql/base}"
 export AC_REPO_URL="${AC_REPO_URL:-https://github.com/MichalVytrhlik/azerothcore-wotlk.git}"
 export AC_REPO_BRANCH="${AC_REPO_BRANCH:-master}"
-export AC_MAPS_DOWNLOAD_URL="${AC_MAPS_DOWNLOAD_URL:-https://github.com/wowgaming/client-data/releases/download/v19/Data.zip}"
+export AC_MAPS_DOWNLOAD_URL="${AC_MAPS_DOWNLOAD_URL:-https://github.com/wowgaming/client-data/releases/download/v20.0/Data.zip}"
 
 export AC_MYSQL_USER="${AC_MYSQL_USER:-acore}"
 export AC_MYSQL_PASS="${AC_MYSQL_PASS:-acore}"
