@@ -47,6 +47,28 @@ case "$INIT_DB_FROM_SCRATCH" in
         ;;
 esac
 
+IMPORT_BASE_SQL="$AC_INIT_DB_IMPORT_BASE_SQL"
+case "$IMPORT_BASE_SQL" in
+    [Tt][Rr][Uu][Ee]|1|[Yy]|[Yy][Ee][Ss])
+        IMPORT_BASE_SQL="true"
+        ;;
+    *)
+        IMPORT_BASE_SQL="false"
+        ;;
+esac
+
+if [ "$INIT_DB_FROM_SCRATCH" = "true" ] && [ -t 0 ]; then
+    read -r -p "Import base SQL now? By default, servers populate the databases automatically on startup (y/N): " IMPORT_BASE_SQL_RESPONSE
+    case "$IMPORT_BASE_SQL_RESPONSE" in
+        [Yy]|[Yy][Ee][Ss])
+            IMPORT_BASE_SQL="true"
+            ;;
+        *)
+            IMPORT_BASE_SQL="false"
+            ;;
+    esac
+fi
+
 MYSQL_RESET_SQL=""
 if [ "$INIT_DB_FROM_SCRATCH" = "true" ]; then
     echo "[4.3] Resetting database user and databases..."
@@ -102,34 +124,39 @@ EOF
 echo "      ✓ Databases created"
 
 if [ "$INIT_DB_FROM_SCRATCH" = "true" ]; then
-    echo "[4.6] Importing database structure..."
-    AUTH_SQL_FILES=("$AC_SQL_BASE_DIR"/db_auth/*.sql)
-    CHAR_SQL_FILES=("$AC_SQL_BASE_DIR"/db_characters/*.sql)
-    WORLD_SQL_FILES=("$AC_SQL_BASE_DIR"/db_world/*.sql)
+    if [ "$IMPORT_BASE_SQL" = "true" ]; then
+        echo "[4.6] Importing database structure..."
+        AUTH_SQL_FILES=("$AC_SQL_BASE_DIR"/db_auth/*.sql)
+        CHAR_SQL_FILES=("$AC_SQL_BASE_DIR"/db_characters/*.sql)
+        WORLD_SQL_FILES=("$AC_SQL_BASE_DIR"/db_world/*.sql)
 
-    if [ "${AUTH_SQL_FILES[0]}" = "$AC_SQL_BASE_DIR/db_auth/*.sql" ] || \
-       [ "${CHAR_SQL_FILES[0]}" = "$AC_SQL_BASE_DIR/db_characters/*.sql" ] || \
-       [ "${WORLD_SQL_FILES[0]}" = "$AC_SQL_BASE_DIR/db_world/*.sql" ]; then
-        echo "      ✗ Base SQL files not found under $AC_SQL_BASE_DIR"
-        exit 1
+        if [ "${AUTH_SQL_FILES[0]}" = "$AC_SQL_BASE_DIR/db_auth/*.sql" ] || \
+           [ "${CHAR_SQL_FILES[0]}" = "$AC_SQL_BASE_DIR/db_characters/*.sql" ] || \
+           [ "${WORLD_SQL_FILES[0]}" = "$AC_SQL_BASE_DIR/db_world/*.sql" ]; then
+            echo "      ✗ Base SQL files not found under $AC_SQL_BASE_DIR"
+            exit 1
+        fi
+
+        echo "      Importing auth database..."
+        for SQL_FILE in "${AUTH_SQL_FILES[@]}"; do
+            mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" acore_auth < "$SQL_FILE"
+        done
+
+        echo "      Importing character database..."
+        for SQL_FILE in "${CHAR_SQL_FILES[@]}"; do
+            mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" acore_characters < "$SQL_FILE"
+        done
+
+        echo "      Importing world database (this may take a while)..."
+        for SQL_FILE in "${WORLD_SQL_FILES[@]}"; do
+            mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" acore_world < "$SQL_FILE"
+        done
+
+        echo "      ✓ Database structure imported"
+    else
+        echo "[4.6] Skipping base SQL import"
+        echo "      Authserver and worldserver will populate and update databases automatically on startup."
     fi
-
-    echo "      Importing auth database..."
-    for SQL_FILE in "${AUTH_SQL_FILES[@]}"; do
-        mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" acore_auth < "$SQL_FILE"
-    done
-
-    echo "      Importing character database..."
-    for SQL_FILE in "${CHAR_SQL_FILES[@]}"; do
-        mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" acore_characters < "$SQL_FILE"
-    done
-
-    echo "      Importing world database (this may take a while)..."
-    for SQL_FILE in "${WORLD_SQL_FILES[@]}"; do
-        mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" acore_world < "$SQL_FILE"
-    done
-
-    echo "      ✓ Database structure imported"
 else
     echo "[4.6] Skipping full import (existing database preserved)"
 
