@@ -34,7 +34,9 @@ for helper_script in \
     init-db.sh \
     configure-azerothcore.sh \
     extract-maps.sh \
+    start-authserver.sh \
     start-servers.sh \
+    start-worldserver.sh \
     status.sh \
     acore-welcome.sh \
     setup-azerothcore.sh; do
