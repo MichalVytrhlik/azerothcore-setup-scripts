@@ -17,6 +17,7 @@ sudo apt install -y \
     git cmake make gcc g++ clang \
     libmysqlclient-dev libssl-dev libbz2-dev \
     libreadline-dev libncurses-dev libboost-all-dev \
+    libstdc++-16-dev \
     mysql-server mysql-client \
     p7zip curl unzip wget sudo screen
 echo "      ✓ Installed"
