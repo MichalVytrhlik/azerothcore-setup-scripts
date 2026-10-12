@@ -159,12 +159,6 @@ if [ "$INIT_DB_FROM_SCRATCH" = "true" ]; then
     fi
 else
     echo "[4.6] Skipping full import (existing database preserved)"
-
-    if ! mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" -Nse "SELECT 1 FROM information_schema.tables WHERE table_schema = 'acore_auth' AND table_name = 'account_banned' LIMIT 1;" | grep -q 1; then
-        echo "      ✗ Existing acore_auth schema is incomplete (missing account_banned)"
-        echo "      Re-run with AC_INIT_DB_FROM_SCRATCH=true to rebuild databases"
-        exit 1
-    fi
 fi
 
 echo ""
