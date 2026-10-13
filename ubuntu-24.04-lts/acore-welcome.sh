@@ -18,6 +18,6 @@ Available scripts in $AC_INSTALL_HELPERS_DIR/:
   4. Check Status: $AC_INSTALL_HELPERS_DIR/status.sh
 
 Next: $AC_INSTALL_HELPERS_DIR/extract-maps.sh
-Run configure-realm.sh only after init-db.sh imports base SQL or authserver/worldserver have completed their automatic database import.
+Run configure-realm.sh only after authserver/worldserver have completed their automatic database import.
 
 EOF

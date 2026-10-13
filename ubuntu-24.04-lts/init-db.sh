@@ -47,31 +47,22 @@ case "$INIT_DB_FROM_SCRATCH" in
         ;;
 esac
 
-IMPORT_BASE_SQL="$AC_INIT_DB_IMPORT_BASE_SQL"
-case "$IMPORT_BASE_SQL" in
-    [Tt][Rr][Uu][Ee]|1|[Yy]|[Yy][Ee][Ss])
-        IMPORT_BASE_SQL="true"
-        ;;
-    *)
-        IMPORT_BASE_SQL="false"
-        ;;
-esac
+get_mysql_create_sql_file_content() {
+    local mysql_create_sql_file="$AC_CODE_DIR/data/sql/create/create_mysql.sql"
+    if [ ! -f "$mysql_create_sql_file" ]; then
+        echo "      ⚠ MySQL creation script not found: $mysql_create_sql_file; check the AzerothCore source directory." >&2
+        printf ''
+    else
+        sed -i \
+            -e "s|'acore'@'localhost'|'$AC_MYSQL_USER'@'$AC_MYSQL_HOST'|g" \
+            -e "s|IDENTIFIED BY 'acore'|IDENTIFIED BY '$AC_MYSQL_PASS'|g" \
+            "$mysql_create_sql_file" && cat "$mysql_create_sql_file"
+    fi
+}
 
-if [ "$INIT_DB_FROM_SCRATCH" = "true" ] && [ -t 0 ]; then
-    read -r -p "Import base SQL now? By default, servers populate the databases automatically on startup (y/N): " IMPORT_BASE_SQL_RESPONSE
-    case "$IMPORT_BASE_SQL_RESPONSE" in
-        [Yy]|[Yy][Ee][Ss])
-            IMPORT_BASE_SQL="true"
-            ;;
-        *)
-            IMPORT_BASE_SQL="false"
-            ;;
-    esac
-fi
-
-MYSQL_RESET_SQL=""
 if [ "$INIT_DB_FROM_SCRATCH" = "true" ]; then
     echo "[4.3] Resetting database user and databases..."
+    MYSQL_CREATE_SQL_FILE_CONTENT=$(get_mysql_create_sql_file_content)
     MYSQL_RESET_SQL=$(cat <<EOF
 DROP USER IF EXISTS '$AC_MYSQL_USER'@'$AC_MYSQL_HOST';
 DROP DATABASE IF EXISTS acore_world;
@@ -79,32 +70,19 @@ DROP DATABASE IF EXISTS acore_characters;
 DROP DATABASE IF EXISTS acore_auth;
 EOF
 )
-else
-    echo "[4.3] Ensuring database user exists..."
-fi
-
-MYSQL_CREATE_SQL_FILE="$AC_CODE_DIR/data/sql/create/create_mysql.sql"
-if [ ! -f "$MYSQL_CREATE_SQL_FILE" ]; then
-    echo "      ✗ MySQL creation script not found: $MYSQL_CREATE_SQL_FILE"
-    exit 1
-fi
-
-sed -i \
-    -e "s|'acore'@'localhost'|'$AC_MYSQL_USER'@'$AC_MYSQL_HOST'|g" \
-    -e "s|IDENTIFIED BY 'acore'|IDENTIFIED BY '$AC_MYSQL_PASS'|g" \
-    "$MYSQL_CREATE_SQL_FILE"
-
-MYSQL_CREATE_SQL_FILE_CONTENT=$(cat "$MYSQL_CREATE_SQL_FILE")
-
-sudo mysql -u root <<EOF
+    sudo mysql -u root <<EOF
 $MYSQL_RESET_SQL
 $MYSQL_CREATE_SQL_FILE_CONTENT
 EOF
-
-if [ "$INIT_DB_FROM_SCRATCH" = "true" ]; then
-    echo "      ✓ Databases reset from scratch"
-else
+elif [ "$EXISTING_ACORE_DB_COUNT" -eq 0 ]; then
+    echo "[4.3] Ensuring database user and databases exist..."
+    MYSQL_CREATE_SQL_FILE_CONTENT=$(get_mysql_create_sql_file_content)
+    sudo mysql -u root <<EOF
+$MYSQL_CREATE_SQL_FILE_CONTENT
+EOF
     echo "      ✓ User ready: $AC_MYSQL_USER"
+else
+    echo "[4.3] Existing AzerothCore databases found; preserving them."
 fi
 
 # Test connection
@@ -113,50 +91,8 @@ mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" -e "SELECT 1;" 
 echo "      ✓ Connection successful"
 echo ""
 
-# Create databases
-echo "[4.5] Creating databases..."
-mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" <<EOF
-CREATE DATABASE IF NOT EXISTS acore_world;
-CREATE DATABASE IF NOT EXISTS acore_characters;
-CREATE DATABASE IF NOT EXISTS acore_auth;
-EOF
-
-echo "      ✓ Databases created"
-
 if [ "$INIT_DB_FROM_SCRATCH" = "true" ]; then
-    if [ "$IMPORT_BASE_SQL" = "true" ]; then
-        echo "[4.6] Importing database structure..."
-        AUTH_SQL_FILES=("$AC_SQL_BASE_DIR"/db_auth/*.sql)
-        CHAR_SQL_FILES=("$AC_SQL_BASE_DIR"/db_characters/*.sql)
-        WORLD_SQL_FILES=("$AC_SQL_BASE_DIR"/db_world/*.sql)
-
-        if [ "${AUTH_SQL_FILES[0]}" = "$AC_SQL_BASE_DIR/db_auth/*.sql" ] || \
-           [ "${CHAR_SQL_FILES[0]}" = "$AC_SQL_BASE_DIR/db_characters/*.sql" ] || \
-           [ "${WORLD_SQL_FILES[0]}" = "$AC_SQL_BASE_DIR/db_world/*.sql" ]; then
-            echo "      ✗ Base SQL files not found under $AC_SQL_BASE_DIR"
-            exit 1
-        fi
-
-        echo "      Importing auth database..."
-        for SQL_FILE in "${AUTH_SQL_FILES[@]}"; do
-            mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" acore_auth < "$SQL_FILE"
-        done
-
-        echo "      Importing character database..."
-        for SQL_FILE in "${CHAR_SQL_FILES[@]}"; do
-            mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" acore_characters < "$SQL_FILE"
-        done
-
-        echo "      Importing world database (this may take a while)..."
-        for SQL_FILE in "${WORLD_SQL_FILES[@]}"; do
-            mysql -h "$AC_MYSQL_HOST" -u "$AC_MYSQL_USER" -p"$AC_MYSQL_PASS" acore_world < "$SQL_FILE"
-        done
-
-        echo "      ✓ Database structure imported"
-    else
-        echo "[4.6] Skipping base SQL import"
-        echo "      Authserver and worldserver will populate and update databases automatically on startup."
-    fi
+    echo "Database schemas and data will be populated by authserver/worldserver on startup."
 else
-    echo "[4.6] Skipping full import (existing database preserved)"
+    echo "Existing database preserved; authserver/worldserver will apply pending updates on startup."
 fi

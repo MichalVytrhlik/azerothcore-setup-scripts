@@ -28,7 +28,7 @@ Then you can:
 | `install-deps.sh` | Installs apt packages needed to build/run AzerothCore |
 | `sync-source.sh` | Clones repository on first run, pulls updates on later runs |
 | `build-azerothcore.sh` | CMake configure + compile + install + create `.conf` files |
-| `init-db.sh` | Sets up MySQL user/databases and optionally imports base SQL |
+| `init-db.sh` | Sets up the MySQL user and creates the AzerothCore databases |
 | `configure-realm.sh` | Configures the `realmlist` address and subnet for LAN clients |
 | `configure-azerothcore.sh` | Writes DB/data paths into configs, installs helper scripts to `$AC_INSTALL_HELPERS_DIR` (default: `$HOME/scripts`), updates `.bashrc` welcome block |
 | `extract-maps.sh` | Interactive map setup: extract from local WoW client or download pre-extracted data |
@@ -64,7 +64,7 @@ After the auth database has been initialized, configure the realm's LAN address:
 "${AC_INSTALL_HELPERS_DIR:-$HOME/scripts}/configure-realm.sh"
 ```
 
-Run `configure-realm.sh` only after the database exists and has been populated: either `init-db.sh` imported the base SQL (`AC_INIT_DB_IMPORT_BASE_SQL=true`), or `authserver`/`worldserver` have been started and their automatic database import has completed.
+Run `configure-realm.sh` only after `authserver`/`worldserver` have been started and their automatic database import has completed.
 
 ---
 
@@ -78,7 +78,6 @@ export AC_MYSQL_PASS=strong-password
 export AC_REPO_BRANCH=master
 export AC_BUILD_CORES=4
 export AC_INIT_DB_FROM_SCRATCH=true
-export AC_INIT_DB_IMPORT_BASE_SQL=false
 ./setup-azerothcore.sh
 ```
 
@@ -91,7 +90,6 @@ Important variables:
 - `AC_REALM_ADDRESS`, `AC_REALM_LOCAL_ADDRESS`, `AC_REALM_SUBNET`
 - `AC_MAPS_DOWNLOAD_URL`
 - `AC_BUILD_CORES`
-- `AC_INIT_DB_IMPORT_BASE_SQL` (default: `false`; let authserver/worldserver populate and update the databases on startup; set to `true` to import base SQL during initialization)
 - `AC_INSTALL_HELPERS_DIR` (default: `$HOME/scripts`)
 
 ---
@@ -100,6 +98,6 @@ Important variables:
 
 - `build-azerothcore.sh` can take a long time on slower hardware.
 - `init-db.sh` is interactive when existing `acore_*` databases are detected (unless `AC_INIT_DB_FROM_SCRATCH` is set).
-- During scratch initialization, `init-db.sh` asks whether to import base SQL now. The default is `false`; if unchanged, authserver and worldserver populate and update the databases automatically when started.
+- `init-db.sh` creates the AzerothCore databases and MySQL user, but does not import tables or data. Authserver/worldserver populate new databases and apply updates automatically on startup.
 - Run `configure-realm.sh` after the servers have initialized the auth database to configure the realm's LAN address; set `AC_REALM_ADDRESS`, `AC_REALM_LOCAL_ADDRESS`, and `AC_REALM_SUBNET` in `acore-env.sh` or the environment to override its defaults.
 - `start-servers.sh` requires map data in `$AC_DIST_DIR/data/maps`.
