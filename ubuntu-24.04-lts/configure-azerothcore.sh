@@ -32,6 +32,7 @@ for helper_script in \
     sync-source.sh \
     build-azerothcore.sh \
     init-db.sh \
+    configure-realm.sh \
     configure-azerothcore.sh \
     extract-maps.sh \
     start-authserver.sh \
