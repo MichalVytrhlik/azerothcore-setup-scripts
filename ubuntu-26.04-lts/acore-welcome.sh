@@ -6,7 +6,7 @@ source "$SCRIPT_DIR/acore-env.sh"
 cat <<EOF
 
 ╔════════════════════════════════════════════════════════════╗
-║           AzerothCore on Ubuntu 24.04 LTS                   ║
+║           AzerothCore on Ubuntu 26.04 LTS                   ║
 ╚════════════════════════════════════════════════════════════╝
 
 Installation Complete! All 5 steps done.

@@ -1,6 +1,6 @@
-# AzerothCore setup scripts for Ubuntu 24.04 LTS
+# AzerothCore setup scripts for Ubuntu 26.04 LTS (Resolute Raccoon)
 
-These scripts automate installing and running **AzerothCore (WotLK)** on **Ubuntu 24.04 LTS**.
+These scripts automate installing and running **AzerothCore (WotLK)** on **Ubuntu 26.04 LTS (Resolute Raccoon)**. Ubuntu 24.04 is not supported by this setup.
 
 ## What these scripts do
 
@@ -41,11 +41,11 @@ Then you can:
 
 ## Install on target machine
 
-On the target Ubuntu 24.04 LTS machine:
+On the target Ubuntu 26.04 LTS machine:
 
 ```bash
 git clone https://github.com/MichalVytrhlik/azerothcore-setup-scripts.git
-cd azerothcore-setup-scripts/ubuntu-24.04-lts
+cd azerothcore-setup-scripts/ubuntu-26.04-lts
 chmod +x *.sh
 ./setup-azerothcore.sh
 ```
